@@ -1,0 +1,44 @@
+services:
+  # the actual db
+  mongo:
+    image: mongo
+    container_name: mongodb-container
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./import:/docker-entrypoint-initdb.d:ro
+    networks:
+      - mongo-shared-net
+
+  # the management interface to the db 
+  mongo-express:
+    depends_on:
+      - mongo
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    networks:
+      - mongo-shared-net 
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb-container 
+      # TODO: use auth to access this or remove entirely on deploy
+      ME_CONFIG_BASICAUTH: false
+
+  # the api built on top of the db
+  login-api:
+    build: .
+    container_name: login-api
+    depends_on:
+      - mongo
+    ports:
+      - "3000:3000"
+    networks:
+      - mongo-shared-net
+    environment:
+      - MONGO_URI=mongodb://mongodb-container:27017/login # mongodb-container -> nome container del db
+
+networks:
+  mongo-shared-net:
+    driver: bridge
