@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info:
+  title: User Login API
+  version: 1.0.0
+  description: API for managing users, user profiles and authentication.
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: A list of users
+    post:
+      summary: Create a new user
+      responses:
+        '201':
+          description: User created

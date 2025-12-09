@@ -37,7 +37,9 @@ services:
     networks:
       - mongo-shared-net
     environment:
-      - MONGO_URI=mongodb://mongodb-container:27017/login # mongodb-container -> nome container del db
+      # mongodb-container -> nome container del db
+      # login -> nome del db
+      - MONGO_URI=mongodb://mongodb-container:27017/login
 
 networks:
   mongo-shared-net:
