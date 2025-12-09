@@ -1,18 +1,270 @@
-openapi: 3.0.3
+# Overview of the API
+openapi: 3.1.1
 info:
   title: User Login API
   version: 1.0.0
   description: API for managing users, user profiles and authentication.
-
+          
 paths:
   /users:
     get:
-      summary: Get all users
+      summary: Returns a list of users.
+      description: This endpoint is for admin use only.
+      tags:
+        - User Info
+      security:
+        - bearerAuth: []
+      produces:
+        - application/json
+      responses:
+        200:
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        401:
+          description: Unauthorized (Invalid Token or not admin).
+    post:
+      summary: Adds a new user.
+      tags:
+        - User Info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        201:
+          description: User added correctly
+        400:
+          description: Invalid credentials
+        409:
+          description: User already present
+  /users/me/password:
+    put:
+      summary: Update user password
+      tags:
+        - User Info
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - oldPassword
+                - newPassword
+              properties:
+                oldPassword:
+                  type: string
+                  format: password
+                  example: oldSecurePass123!
+                newPassword:
+                  type: string
+                  format: password
+                  description: Must be at least 8 characters long
+                  example: newSuperSecretPass99!
+      responses:
+        200:
+          description: Password updated correctly.
+        401:
+          description: Unauthorized (Invalid Token).
+        403:
+          description: Old password incorrect.
+  /users/me/image-url:
+    put:
+      summary: Update user image
+      tags:
+        - User Info
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - image-url
+              properties:
+                image-url:
+                  type: string
+                  example: werewolf.jpg
+      responses:
+        200:
+          description: Image-url updated correctly.
+        401:
+          description: Unauthorized (Invalid Token).
+  # -------------------------
+  # LOGIN ENDPOINT
+  # -------------------------
+  /auth/login:
+    post:
+      summary: Login user
+      description: Authenticates a user and returns an Access Token (JWT) and a Refresh Token.
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: A list of users
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials (wrong email or password)
+
+  # -------------------------
+  # REFRESH ENDPOINT
+  # -------------------------
+  /auth/refresh:
     post:
-      summary: Create a new user
+      summary: Refresh Access Token
+      description: >
+        Uses a valid Refresh Token to obtain a new Access Token. 
+        Implements 'Refresh Token Rotation' (returns a new refresh token too).
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
-        '201':
-          description: User created
+        '200':
+          description: Tokens refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '403':
+          description: Refresh token invalid, expired, or revoked
+
+  # -------------------------
+  # LOGOUT ENDPOINT
+  # -------------------------
+  /auth/logout:
+    post:
+      summary: Logout user
+      description: Invalidates the specific Refresh Token provided in the body.
+      tags:
+        - Auth
+      # Although logout is often public, it is safer to require the Access Token 
+      # to prove the user is who they say they are before deleting their refresh token.
+      security:
+        - bearerAuth: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '204':
+          description: Logout successful (No Content)
+        '400':
+          description: Bad request (missing token)
+
+components:
+  # -------------------------
+  # SECURITY SCHEMES
+  # -------------------------
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # -------------------------
+  # DATA SCHEMAS
+  # -------------------------
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        email:
+          type: string
+          format: email
+          example: johndoe@gmail.com
+        name:
+          type: string
+          example: John Doe
+        is-admin:
+          type: bool
+          example: false
+        image-url:
+          type: string
+          example: werewolf.jpg
+    UserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: johndoe@gmail.com
+        name:
+          type: string
+          example: John Doe
+        password:
+          type: string
+          format: password
+          example: P4ssW0rd!2025?
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: johndoe@gmail.com
+        password:
+          type: string
+          format: password
+          example: P4ssW0rd!2025?
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT Access Token (Short lived)
+          example: eyJhbGciOiJIUzI1NiI9R5R5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: Opaque Refresh Token (Long lived)
+          example: 8xLc90s8w...
+        expiresIn:
+          type: integer
+          description: Seconds until access token expires
+          example: 900
+        tokenType:
+          type: string
+          example: Bearer
+    
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: The refresh token previously issued to the client
+          example: dkw99JJUHI98... (long opaque string)
