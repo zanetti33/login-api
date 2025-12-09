@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DB_NAME="dbMovies"
-DB_COLLECTION="movies"
+DB_NAME="login"
+DB_COLLECTION="users"
 
 echo "Importing databases"
 

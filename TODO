@@ -3,8 +3,9 @@ PARTE /import
 init-db.sh viene eseguito alla creazione del container.
 Esso cicla tutti i file .json dentro a /db.
 Al suo interno importa tutti i file nella collection specificata.
-TODO fare in modo che importi diversi file in diverse collection
-TODO e ovviamente cambiare i dati con dei nostri dati
+
+
+TODO Mettere dati di default in default_users.json
 
 TODO adattare index.js e tutto /src al nostro caso d'uso
 
