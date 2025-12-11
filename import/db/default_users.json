@@ -1,1 +1,8 @@
-{}
+{
+    "id": 1,
+    "name": "String",
+    "password": "String",
+    "email": "String",
+    "isAdmin": true,
+    "imageUrl": "String"
+}

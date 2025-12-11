@@ -1,7 +1,7 @@
-const { movieModel } = require('../models/moviesModel');
+const { userModel } = require('../models/userModel');
 
-exports.listMovies = (req, res) => {
-    movieModel.find()
+exports.listUsers = (req, res) => {
+    userModel.find()
         .then(doc => {
             res.json(doc);
         })
@@ -10,8 +10,9 @@ exports.listMovies = (req, res) => {
         });
 }
 
+/*
 exports.readMovie = (req, res) => {
-    movieModel.findById(req.params.id)
+    userModel.findById(req.params.id)
         .then(doc => {
             if (!doc) {
                 return res.status(404).send('Movie not found');
@@ -21,21 +22,30 @@ exports.readMovie = (req, res) => {
         .catch(err => {
             res.status(500).send(err);
         });
-}
+}*/
 
-exports.createMovie = (req, res) => {
-    const movie = new movieModel(req.body);
+exports.createUser = (req, res) => {
+    const movie = new userModel(req.body);
+    if (!movie.email || !movie.password || movie.name) { //non penso funzioni così qui
+        return res.status(400).send('Missing parameters')
+    }
     movie.save()
         .then(doc => {
             res.json(doc);
         })
         .catch(err => {
-            res.status(500).send(err);
+            res.status(409).send('User already registered');
         });
 }
 
+exports.updatePassword = (req, res) => {}
+exports.updateImage = (req, res) => {}
+exports.loginUser = (req, res) => {}
+exports.refreshToken = (req, res) => {}
+exports.logoutUser = (req, res) => {}
+/*
 exports.updateMovie = (req, res) => {
-    movieModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    userModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
         .then(doc => {
             if (!doc) {
                 return res.status(404).send('Movie not found');
@@ -48,7 +58,7 @@ exports.updateMovie = (req, res) => {
 }
 
 exports.deleteMovie = (req, res) => {
-    movieModel.findByIdAndDelete(req.params.id)
+    userModel.findByIdAndDelete(req.params.id)
         .then(doc => {
             if (!doc) {
                 return res.status(404).send('Movie not found');
@@ -61,7 +71,7 @@ exports.deleteMovie = (req, res) => {
 }
 
 exports.findBestMovie = (req, res) => {
-    movieModel.findOne()
+    userModel.findOne()
         .where('_id').equals('5692a15524de1e0ce2dfcfa3')
         // .sort({ released: -1 })
         .then(doc => {
@@ -79,7 +89,7 @@ exports.findMoviesByActorAndYearRange = (req, res) => {
         return res.status(400).send('Missing query parameters');
     }
 
-    movieModel.find()
+    userModel.find()
         .where('actors').equals(actor)
         .where('year').gte(startYear).lte(endYear)
         .then(docs => {
@@ -89,3 +99,4 @@ exports.findMoviesByActorAndYearRange = (req, res) => {
             res.status(500).send(err);
         });
 }
+        */
