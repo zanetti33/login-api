@@ -27,18 +27,22 @@ exports.readMovie = (req, res) => {
 }*/
 
 exports.createUser = (req, res) => {
-    const movie = new userModel(req.body);
-    console.log(movie);
-    console.log(movie.name);
-    if (!movie.email || !movie.password || !movie.name) { //non penso funzioni così qui
-        return res.status(400).send('Missing parameters')
+    const user = new userModel(req.body);
+    //console.log(user);
+    if (!user.email || !user.password || !user.name) {
+        return res.status(400).send('Missing parameters');
     }
-    movie.save()
+    user.save()
         .then(doc => {
             res.json(doc);
         })
         .catch(err => {
-            res.status(409).send('User already registered');
+            if (err.code === 11000) {
+                return res.status(409).send('User already registered (Email or Username already exists)');
+            }
+            if (err.name === 'ValidationError') {
+                 return res.status(400).send(err.message);
+            }
         });
 }
 
