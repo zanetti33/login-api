@@ -11,7 +11,7 @@ exports.authorize = (req, res, next) => {
     }
 
     try {
-        req.user = validateToken(token);
+        req.userInfo = validateToken(token);
     } catch (err) {
         return res.sendStatus(403);
     }
