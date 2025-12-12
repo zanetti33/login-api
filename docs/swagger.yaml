@@ -93,7 +93,7 @@ paths:
               required:
                 - imageUrl
               properties:
-                image-url:
+                imageUrl:
                   type: string
                   example: werewolf.jpg
       responses:
