@@ -10,6 +10,20 @@ exports.listUsers = (req, res) => {
         });
 }
 
+exports.getUser = (req, res) => {
+    userModel.findById(req.params.id)
+        .then(doc => {
+            console.log(doc);
+            if (!doc) {
+                return res.status(404).send('User not found.');
+            }
+            res.json(doc);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
 /*
 exports.readMovie = (req, res) => {
     userModel.findById(req.params.id)
@@ -40,8 +54,42 @@ exports.createUser = (req, res) => {
         });
 }
 
-exports.updatePassword = (req, res) => {}
-exports.updateImage = (req, res) => {}
+exports.updatePassword = (req, res) => {
+    const user = userModel.findById("693c31e46a311353ac2b8d2a");
+    const oldPassword = (req.body.oldPassword);
+    const newPassword = (req.body.newPassword);
+    if (user.password != oldPassword) {
+        return res.status(403).send('Old password incorrect.')
+    }
+
+    user.password = newPassword;
+    user.save()
+        .then(doc => {
+            res.json(doc);
+            res.status(200).send('Password updated correctly.');
+        })
+        .catch(err => {
+            res.status(409).send('User already registered');
+        });
+    
+}
+
+
+exports.updateImage = (req, res) => {
+    const user = userModel.findById("693c31e46a311353ac2b8d2a");
+    const image = (req.body.imageUrl);
+    user.imageUrl = image;
+    user.save()
+        .then(doc => {
+            res.json(doc);
+            res.status(200).send('Image updated correctly.');
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
+
 exports.loginUser = (req, res) => {}
 exports.refreshToken = (req, res) => {}
 exports.logoutUser = (req, res) => {}
