@@ -1,4 +1,5 @@
 - Fare hash delle password + sale
 - Implementare l'uso del refresh
+- Https per comunicazioni sicure verso il login o renderlochiuso dentro docker
 
 
