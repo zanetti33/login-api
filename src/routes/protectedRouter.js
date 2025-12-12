@@ -15,9 +15,6 @@ router.route('/users/me/password')
 router.route('/users/me/imageUrl')
     .put(controller.updateImage);
 
-router.route('/auth/login')
-    .post(controller.loginUser);
-
 router.route('/auth/refresh')
     .post(controller.refreshToken);
     

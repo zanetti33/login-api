@@ -77,7 +77,7 @@ paths:
           description: Unauthorized (Invalid Token).
         403:
           description: Old password incorrect.
-  /users/me/image-url:
+  /users/me/imageUrl:
     put:
       summary: Update user image
       tags:
@@ -91,14 +91,14 @@ paths:
             schema:
               type: object
               required:
-                - image-url
+                - imageUrl
               properties:
                 image-url:
                   type: string
                   example: werewolf.jpg
       responses:
         200:
-          description: Image-url updated correctly.
+          description: Image URL updated correctly.
         401:
           description: Unauthorized (Invalid Token).
   # -------------------------
@@ -205,10 +205,10 @@ components:
         name:
           type: string
           example: John Doe
-        is-admin:
+        isAdmin:
           type: bool
           example: false
-        image-url:
+        imageUrl:
           type: string
           example: werewolf.jpg
     UserRequest:
@@ -228,12 +228,11 @@ components:
     LoginRequest:
       type: object
       required:
-        - email
+        - emailOrName
         - password
       properties:
-        email:
+        emailOrName:
           type: string
-          format: email
           example: johndoe@gmail.com
         password:
           type: string
@@ -247,10 +246,6 @@ components:
           type: string
           description: JWT Access Token (Short lived)
           example: eyJhbGciOiJIUzI1NiI9R5R5cCI6IkpXVCJ9...
-        refreshToken:
-          type: string
-          description: Opaque Refresh Token (Long lived)
-          example: 8xLc90s8w...
         expiresIn:
           type: integer
           description: Seconds until access token expires
