@@ -246,10 +246,6 @@ components:
           type: string
           description: JWT Access Token (Short lived)
           example: eyJhbGciOiJIUzI1NiI9R5R5cCI6IkpXVCJ9...
-        refreshToken:
-          type: string
-          description: Opaque Refresh Token (Long lived)
-          example: 8xLc90s8w...
         expiresIn:
           type: integer
           description: Seconds until access token expires
