@@ -228,12 +228,11 @@ components:
     LoginRequest:
       type: object
       required:
-        - email
+        - emailOrName
         - password
       properties:
-        email:
+        emailOrName:
           type: string
-          format: email
           example: johndoe@gmail.com
         password:
           type: string

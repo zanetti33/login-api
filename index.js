@@ -1,26 +1,43 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const swaggerUi = require('swagger-ui-express');
+const protectedRouter = require('./src/routes/protectedRouter');
+const publicRouter = require('./src/routes/publicRouter');
+const authorizationMiddleware = require('./src/middlewares/authorizationMiddleware');
+const cors = require('cors');
 const YAML = require('yamljs');
 const path = require('path');
-const userRouter = require('./src/routes/userRoutes');
-const cors = require('cors');
 
 // env variable set from docker-compose.yaml to access the database container
 const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/defaul_users'; //non so, prima era dbMovies
 // env variable set from docker-compose.yaml to access set the service port
 const port = process.env.PORT || 3000;
 const swaggerDocument = YAML.load(path.join(__dirname, './docs/swagger.yaml'));
+const swaggerUi = require('swagger-ui-express');
 
 mongoose.connect(connectionString);
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
+// Swagger UI setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use('/', userRouter); //users
+
+// Public API routes
+app.use('/', publicRouter);
+
+app.use((req, res, next) => {
+    console.log(`[DEBUG] Request reaching Auth: ${req.method} ${req.originalUrl}`);
+    next();
+});
+// Authorization middleware
+app.use(authorizationMiddleware.authorize);
+
+// Protected API routes
+app.use('/', protectedRouter);
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
