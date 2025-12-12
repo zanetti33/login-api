@@ -26,7 +26,9 @@ exports.readMovie = (req, res) => {
 
 exports.createUser = (req, res) => {
     const movie = new userModel(req.body);
-    if (!movie.email || !movie.password || movie.name) { //non penso funzioni così qui
+    console.log(movie);
+    console.log(movie.name);
+    if (!movie.email || !movie.password || !movie.name) { //non penso funzioni così qui
         return res.status(400).send('Missing parameters')
     }
     movie.save()

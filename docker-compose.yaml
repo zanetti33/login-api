@@ -27,7 +27,7 @@ services:
       ME_CONFIG_BASICAUTH: false
 
   # the api built on top of the db
-  login-api:
+  frontend:
     build: .
     container_name: login-api
     depends_on:

@@ -1,8 +1,13 @@
 {
-    "id": 1,
-    "name": "String",
-    "password": "String",
-    "email": "String",
-    "isAdmin": true,
-    "imageUrl": "String"
+    "name": "admin",
+    "password": "adminpass",
+    "email": "admin@example.com",
+    "isAdmin": true
+}
+{
+    "name": "zanetti33",
+    "password": "culo1234",
+    "email": "lorenzo.zanetti33@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
 }
