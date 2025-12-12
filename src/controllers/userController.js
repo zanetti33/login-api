@@ -46,8 +46,12 @@ exports.createUser = (req, res) => {
         });
 }
 
-exports.updatePassword = (req, res) => {}
-exports.updateImage = (req, res) => {}
+exports.updatePassword = (req, res) => {
+    res.send('Not implemented');
+}
+exports.updateImage = (req, res) => {
+    res.send('Not implemented');
+}
 
 const getUser = async (identifier, password) => {
     if (!identifier || !password) {
@@ -89,8 +93,12 @@ exports.loginUser = async (req, res) => {
     });
 }
 
-exports.refreshToken = (req, res) => {}
-exports.logoutUser = (req, res) => {}
+exports.refreshToken = (req, res) => {
+    res.send('Not implemented');
+}
+exports.logoutUser = (req, res) => {
+    res.send('Not implemented');
+}
 /*
 exports.updateMovie = (req, res) => {
     userModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
