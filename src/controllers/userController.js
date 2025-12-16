@@ -60,34 +60,56 @@ exports.createUser = (req, res) => {
 }
 
 exports.updatePassword = (req, res) => {
-    const user = userModel.findById("693c31e46a311353ac2b8d2a");
     const oldPassword = (req.body.oldPassword);
     const newPassword = (req.body.newPassword);
-    if (user.password != oldPassword) {
-        return res.status(403).send('Old password incorrect.')
-    }
-
-    user.password = newPassword;
-    user.save()
+    const user = userModel.findById(req.userInfo.id)
         .then(doc => {
-            res.json(doc);
-            res.status(200).send('Password updated correctly.');
+            if (!doc) {
+                return res.status(404).send('User not found');
+            }
+            if (doc.password != oldPassword) {
+                console.log("N "+doc.password+", O "+oldPassword);
+                return res.status(403).send('Old password incorrect.');
+            }
+            userModel.findByIdAndUpdate(req.userInfo.id, {password: newPassword})
+            .then(result => {
+                if (!result) {
+                    return res.status(404).send('User not found');
+                }
+                res.json(result);
+                })
+            .catch(err => {
+                res.status(500).send(err);
+            })
         })
         .catch(err => {
-            res.status(409).send('User already registered');
+            res.status(500).send(err);
         });
     
+    console.log("user: "+user+", req.userInfo.id "+req.userInfo.id);   
 }
 
 
 exports.updateImage = (req, res) => {
-    const user = userModel.findById("693c31e46a311353ac2b8d2a");
-    const image = (req.body.imageUrl);
-    user.imageUrl = image;
-    user.save()
+    userModel.findByIdAndUpdate(req.userInfo.id, {imageUrl: req.body.imageUrl})
         .then(doc => {
+            if (!doc) {
+                return res.status(404).send('User not found');
+            }
             res.json(doc);
-            res.status(200).send('Image updated correctly.');
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
+exports.deleteAccount = (req, res) => {
+    userModel.findByIdAndDelete(req.userInfo.id)
+        .then(doc => {
+            if (!doc) {
+                return res.status(404).send('User not found');
+            }
+            res.json(doc);
         })
         .catch(err => {
             res.status(500).send(err);

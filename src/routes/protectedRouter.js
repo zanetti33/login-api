@@ -14,6 +14,9 @@ router.route('/users/me/password')
 router.route('/users/me/imageUrl')
     .put(controller.updateImage);
 
+router.route('/users/me/delete')
+    .delete(controller.deleteAccount);
+
 router.route('/auth/refresh')
     .post(controller.refreshToken);
     
