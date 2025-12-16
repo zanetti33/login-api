@@ -47,8 +47,8 @@ exports.generateAccessToken = (user) => {
     return generateToken(user, accessDuration);
 }
 
-exports.generateRefreshToken = (user) => {
+exports.generateRefreshToken = async (user) => {
     const token = generateToken(user, refreshDuration);
-    userModel.findByIdAndUpdate(user._id, { refreshToken: token });
+    await userModel.findByIdAndUpdate(user._id, { refreshToken: token });
     return token;
 }

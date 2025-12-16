@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
     password: String,
     email: {type: String, unique: true},
     isAdmin: Boolean,
-    imageUrl: String
+    imageUrl: String,
+    refreshToken: String
 }, {
     versionKey: false
 });

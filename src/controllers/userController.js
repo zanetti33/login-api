@@ -1,4 +1,3 @@
-const { get } = require('mongoose');
 const { userModel } = require('../models/userModel');
 const { generateAccessToken, generateRefreshToken} = require('../services/authorizationService');
 
@@ -119,7 +118,7 @@ exports.loginUser = async (req, res) => {
     }
     // Generate Tokens
     const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const refreshToken = await generateRefreshToken(user);
     // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
     res.cookie('jwt', refreshToken, {
         httpOnly: true,

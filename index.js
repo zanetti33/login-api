@@ -8,9 +8,11 @@ const YAML = require('yamljs');
 const path = require('path');
 
 // env variable set from docker-compose.yaml to access the database container
-const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/defaul_users'; //non so, prima era dbMovies
+const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/defaul_users';
 // env variable set from docker-compose.yaml to access set the service port
 const port = process.env.PORT || 3000;
+// env variable to check if we are in development mode
+const isDev = process.env.NODE_ENV == 'development';
 const swaggerDocument = YAML.load(path.join(__dirname, './docs/swagger.yaml'));
 const swaggerUi = require('swagger-ui-express');
 
@@ -34,7 +36,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/', publicRouter);
 
 // Authorization middleware
-app.use(authorizationMiddleware.authorize);
+if (!isDev) {
+    app.use(authorizationMiddleware.authorize);
+}
 
 // Protected API routes
 app.use('/', protectedRouter);

@@ -9,22 +9,6 @@ services:
     networks:
       - login-internal-net
 
-  # the management interface to the db 
-  mongo-express:
-    depends_on:
-      - mongo
-    image: mongo-express
-    restart: always
-    ports:
-      # for debug purposes only
-      - 8082:8081
-    networks:
-      - login-internal-net
-    environment:
-      ME_CONFIG_MONGODB_SERVER: login-mongodb-container
-      # TODO: use auth to access this or remove entirely on deploy
-      ME_CONFIG_BASICAUTH: false
-
   # the api built on top of the db
   frontend:
     build: .
