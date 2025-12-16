@@ -17,22 +17,22 @@ const swaggerUi = require('swagger-ui-express');
 mongoose.connect(connectionString);
 
 const app = express();
+// Debugging middleware
+app.use((req, res, next) => {
+    console.log(`[DEBUG] Request received: ${req.method} ${req.originalUrl}`);
+    next();
+});
 app.use(cors({
     credentials: true
 }));
 app.use(express.json());
 app.use(express.static('public'));
-
 // Swagger UI setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Public API routes
 app.use('/', publicRouter);
 
-app.use((req, res, next) => {
-    console.log(`[DEBUG] Request reaching Auth: ${req.method} ${req.originalUrl}`);
-    next();
-});
 // Authorization middleware
 app.use(authorizationMiddleware.authorize);
 

@@ -1,6 +1,6 @@
 const { get } = require('mongoose');
 const { userModel } = require('../models/userModel');
-const { generateAccessToken, generateRefreshToken, refreshDuration, accessDuration } = require('../services/authorizationService');
+const { generateAccessToken, generateRefreshToken} = require('../services/authorizationService');
 
 exports.listUsers = (req, res) => {
     userModel.find()
@@ -95,28 +95,39 @@ exports.updateImage = (req, res) => {
         });
 }
 
+const getUser = async (identifier, password) => {
+    if (!identifier || !password) {
+        throw new Error('Missing credentials');
+    }
 
-exports.loginUser = (req, res) => {}
-exports.updatePassword = (req, res) => {}
-exports.updateImage = (req, res) => {}
-exports.loginUser = (req, res) => {
-    // 1. Authenticate User (Mocked)
-    console.log(req);
-    const user = getUser(req.body.emailOrName, req.body.password);
+    const user = await userModel.findOne({
+        $or: [
+            { name: identifier },
+            { email: identifier }
+        ],
+        password: password
+    });
 
-    // 2. Generate Tokens
+    return user;
+}
+
+exports.loginUser = async (req, res) => {
+    // Fetch User
+    user = await getUser(req.body.emailOrName, req.body.password);
+    if (!user) {
+        return res.status(401).send('Invalid credentials');
+    }
+    // Generate Tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
-
-    // 3. Send Refresh Token as HttpOnly Cookie (Security Best Practice)
+    // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
     res.cookie('jwt', refreshToken, {
-        httpOnly: true, // JavaScript cannot access this (Prevents XSS)
-        secure: true,   // HTTPS only (use false for localhost testing)
+        httpOnly: true,
+        secure: false,  // Set to true in production with HTTPS
         sameSite: 'Strict',
         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
-
-    // 4. Send Access Token as JSON
+    // Send Access Token as JSON
     res.json({ 
         "accessToken": accessToken, 
         "expiresIn": 1 * 60 * 60, // 1 hour in seconds
@@ -124,12 +135,12 @@ exports.loginUser = (req, res) => {
     });
 }
 
-getUser = (emailOrName, password) => {
-    return { id: 'user_123', role: 'admin' };
+exports.refreshToken = (req, res) => {
+    res.send('Not implemented');
 }
-
-exports.refreshToken = (req, res) => {}
-exports.logoutUser = (req, res) => {}
+exports.logoutUser = (req, res) => {
+    res.send('Not implemented');
+}
 /*
 exports.updateMovie = (req, res) => {
     userModel.findByIdAndUpdate(req.params.id, req.body, { new: true })

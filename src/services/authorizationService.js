@@ -6,20 +6,31 @@ const publicKey = fs.readFileSync('./public.pem', 'utf8');
 const algorithm = 'RS256';
 const accessDuration = '1h';
 const refreshDuration = '30d';
+exports.publicKey = publicKey;
 
 exports.validateToken = (token) => {
-    console.log("Validating token:", token);
     const decoded = jwt.verify(token, publicKey, { 
         algorithms: [algorithm],
         iss: 'login-api'
     });
-    console.log("Decoded token:", decoded);
-    return decoded.user;
+    // Here we can return whatever info we need from the token
+    // we are currently putting it in req.userInfo in the middleware
+    return {
+        id: decoded.sub,
+        isAdmin: decoded.roles.contains('admin'),
+        name: decoded.name,
+        imageUrl: decoded.imageUrl
+    };
 }
 
 generateToken = (user, duration) => {
+    // Here we decide what data to store in the token
+    // sub, roles and iss are standard claims
     const payload = {
-        user: user,
+        sub: user.id,
+        roles: user.isAdmin ? ['admin'] : ['user'],
+        name: user.name,
+        imageUrl: user.imageUrl,
         iss: 'login-api' 
     };
     // SIGNING
