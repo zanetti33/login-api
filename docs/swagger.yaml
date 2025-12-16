@@ -102,7 +102,7 @@ paths:
         401:
           description: Unauthorized (Invalid Token).
   /users/me/delete:
-    put:
+    delete:
       summary: Delete user account
       tags:
         - User Info
