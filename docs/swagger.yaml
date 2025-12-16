@@ -101,6 +101,26 @@ paths:
           description: Image URL updated correctly.
         401:
           description: Unauthorized (Invalid Token).
+  /users/me/delete:
+    put:
+      summary: Delete user account
+      tags:
+        - User Info
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              properties:
+      responses:
+        200:
+          description: Account deleted correctly.
+        401:
+          description: Unauthorized (Invalid Token).
   # -------------------------
   # LOGIN ENDPOINT
   # -------------------------
