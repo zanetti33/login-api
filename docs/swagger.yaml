@@ -110,6 +110,7 @@ paths:
       description: Authenticates a user and returns an Access Token (JWT) and a Refresh Token.
       tags:
         - Auth
+      security: []
       requestBody:
         required: true
         content:
@@ -137,6 +138,8 @@ paths:
         Implements 'Refresh Token Rotation' (returns a new refresh token too).
       tags:
         - Auth
+      security:
+        - bearerAuth: [] 
       requestBody:
         required: true
         content:
@@ -162,8 +165,6 @@ paths:
       description: Invalidates the specific Refresh Token provided in the body.
       tags:
         - Auth
-      # Although logout is often public, it is safer to require the Access Token 
-      # to prove the user is who they say they are before deleting their refresh token.
       security:
         - bearerAuth: [] 
       requestBody:
@@ -177,6 +178,25 @@ paths:
           description: Logout successful (No Content)
         '400':
           description: Bad request (missing token)
+  # -------------------------
+  # PUBLIC KEY ENDPOINT
+  # -------------------------
+  /auth/public-key:
+    get:
+      summary: Get Public Key
+      description: Returns the public key used to verify JWT signatures on the client side or by third-party services.
+      tags:
+        - Auth
+      security: [] # Explicitly public
+      responses:
+        '200':
+          description: Public Key retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicKeyResponse'
+        '500':
+          description: Internal Server Error
 
 components:
   # -------------------------
@@ -192,6 +212,7 @@ components:
   # DATA SCHEMAS
   # -------------------------
   schemas:
+
     User:
       type: object
       properties:
@@ -211,6 +232,7 @@ components:
         imageUrl:
           type: string
           example: werewolf.jpg
+
     UserRequest:
       type: object
       properties:
@@ -225,6 +247,7 @@ components:
           type: string
           format: password
           example: P4ssW0rd!2025?
+          
     LoginRequest:
       type: object
       required:
@@ -263,3 +286,14 @@ components:
           type: string
           description: The refresh token previously issued to the client
           example: dkw99JJUHI98... (long opaque string)
+
+    PublicKeyResponse:
+      type: object
+      properties:
+        publicKey:
+          type: string
+          description: The Public Key (PEM format) used for verification.
+          example: |
+            -----BEGIN PUBLIC KEY-----
+            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqz...
+            -----END PUBLIC KEY-----
