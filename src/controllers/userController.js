@@ -104,6 +104,19 @@ exports.updateImage = (req, res) => {
         });
 }
 
+exports.deleteAccount = (req, res) => {
+    userModel.findByIdAndDelete(req.userInfo.id)
+        .then(doc => {
+            if (!doc) {
+                return res.status(404).send('User not found');
+            }
+            res.json(doc);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
 const getUser = async (identifier, password) => {
     if (!identifier || !password) {
         throw new Error('Missing credentials');
