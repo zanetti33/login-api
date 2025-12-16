@@ -40,6 +40,8 @@ services:
       # mongodb-container -> nome container del db
       # login -> nome del db
       - MONGO_URI=mongodb://mongodb-container:27017/login
+      # production or development
+      - NODE_ENV=development
 
 networks:
   mongo-shared-net:
