@@ -160,7 +160,16 @@ exports.refreshToken = (req, res) => {
     res.send('Not implemented');
 }
 exports.logoutUser = (req, res) => {
-    res.send('Not implemented');
+    userModel.findByIdAndUpdate(req.userInfo.id, {refreshToken: null})
+        .then(doc => {
+            if (!doc) {
+                return res.status(404).send('User not found');
+            }
+            res.json(doc);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
 }
 /*
 exports.updateMovie = (req, res) => {
