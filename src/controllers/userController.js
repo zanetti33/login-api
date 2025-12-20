@@ -25,20 +25,6 @@ exports.getUser = (req, res) => {
         });
 }
 
-/*
-exports.readMovie = (req, res) => {
-    userModel.findById(req.params.id)
-        .then(doc => {
-            if (!doc) {
-                return res.status(404).send('Movie not found');
-            }
-            res.json(doc);
-        })
-        .catch(err => {
-            res.status(500).send(err);
-        });
-}*/
-
 exports.createUser = (req, res) => {
     const user = new userModel(req.body);
     //console.log(user);
@@ -156,9 +142,29 @@ exports.loginUser = async (req, res) => {
     });
 }
 
-exports.refreshToken = (req, res) => {
-    res.send('Not implemented');
+exports.refreshToken = async (req, res) => {
+    const user = await userModel.findById(req.userInfo.id);
+    if (user.refreshToken != req.body.refreshToken) {
+        return res.status(403).send('Refresh token invalid, expired, or revoked');
+    }
+    // Generate Tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user);
+    // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
+    res.cookie('jwt', refreshToken, {
+        httpOnly: true,
+        secure: false,  // Set to true in production with HTTPS
+        sameSite: 'Strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    });
+    // Send Access Token as JSON
+    res.json({ 
+        "accessToken": accessToken, 
+        "expiresIn": 1 * 60 * 60, // 1 hour in seconds
+        "tokenType": "Bearer"
+    });
 }
+
 exports.logoutUser = (req, res) => {
     userModel.findByIdAndUpdate(req.userInfo.id, {refreshToken: null})
         .then(doc => {
