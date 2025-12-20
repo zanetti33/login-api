@@ -8,7 +8,7 @@ const YAML = require('yamljs');
 const path = require('path');
 
 // env variable set from docker-compose.yaml to access the database container
-const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/defaul_users';
+const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/users';
 // env variable set from docker-compose.yaml to access set the service port
 const port = process.env.PORT || 3000;
 // env variable to check if we are in development mode
