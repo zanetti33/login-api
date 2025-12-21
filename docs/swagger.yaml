@@ -172,13 +172,7 @@ paths:
       tags:
         - Auth
       security:
-        - bearerAuth: [] 
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RefreshTokenRequest'
+        - bearerAuth: []
       responses:
         '204':
           description: Logout successful (No Content)
