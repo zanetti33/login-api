@@ -6,6 +6,7 @@ const authorizationMiddleware = require('./src/middlewares/authorizationMiddlewa
 const cors = require('cors');
 const YAML = require('yamljs');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 // env variable set from docker-compose.yaml to access the database container
 const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/login';
@@ -25,8 +26,10 @@ app.use((req, res, next) => {
     next();
 });
 app.use(cors({
+    origin: 'http://localhost:3000',
     credentials: true
 }));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('public'));
 // Swagger UI setup

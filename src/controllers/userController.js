@@ -143,21 +143,23 @@ exports.loginUser = async (req, res) => {
 }
 
 exports.refreshToken = async (req, res) => {
-    const refreshToken = req.cookies.jwt;
-    if (!refreshToken) {
-        return res.status(401).json({ message: 'No refresh token provided' });
+    // Get refreshToken from cookies
+    const incomingRefreshToken = req.cookies.jwt;
+    if (!incomingRefreshToken) {
+        return res.status(403).send();
     }
     try {
-        const decodedInfo = validateToken(refreshToken);
+        // Validate Token with crypt and database value
+        const decodedInfo = validateToken(incomingRefreshToken);
         const user = await userModel.findById(decodedInfo.id);
-        if (!user || user.refreshToken !== refreshToken) {
-            return res.status(403).json({ message: 'Invalid refresh token session' });
+        if (!user || user.refreshToken !== incomingRefreshToken) {
+            return res.status(403).send();
         }
         // Generate Tokens
         const accessToken = generateAccessToken(user);
-        const refreshToken = await generateRefreshToken(user);
+        const newRefreshToken = await generateRefreshToken(user);
         // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
-        res.cookie('jwt', refreshToken, {
+        res.cookie('jwt', newRefreshToken, {
             httpOnly: true,
             secure: false,  // Set to true in production with HTTPS
             sameSite: 'Strict',
@@ -170,7 +172,8 @@ exports.refreshToken = async (req, res) => {
             "tokenType": "Bearer"
         });
     } catch (err) {
-        return res.status(403).send("Token expired or invalid");
+        console.log(err);
+        return res.status(403).send();
     }
 }
 

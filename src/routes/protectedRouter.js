@@ -16,9 +16,6 @@ router.route('/users/me/imageUrl')
 
 router.route('/users/me/delete')
     .delete(controller.deleteAccount);
-
-router.route('/auth/refresh')
-    .post(controller.refreshToken);
     
 router.route('/auth/logout')
     .post(controller.logoutUser);

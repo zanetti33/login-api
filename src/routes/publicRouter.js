@@ -8,6 +8,9 @@ router.route('/users')
 
 router.route('/auth/login')
     .post(controller.loginUser);
+    
+router.route('/auth/refresh')
+    .post(controller.refreshToken);
 
 router.route('/auth/public-key')
     .get((_, res) => {
