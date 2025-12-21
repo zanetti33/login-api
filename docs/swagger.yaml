@@ -152,12 +152,6 @@ paths:
         - Auth
       security:
         - bearerAuth: [] 
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
         '200':
           description: Tokens refreshed successfully
@@ -288,16 +282,6 @@ components:
         tokenType:
           type: string
           example: Bearer
-    
-    RefreshTokenRequest:
-      type: object
-      required:
-        - refreshToken
-      properties:
-        refreshToken:
-          type: string
-          description: The refresh token previously issued to the client
-          example: dkw99JJUHI98... (long opaque string)
 
     PublicKeyResponse:
       type: object

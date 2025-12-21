@@ -1,5 +1,5 @@
 const { userModel } = require('../models/userModel');
-const { generateAccessToken, generateRefreshToken} = require('../services/authorizationService');
+const { generateAccessToken, generateRefreshToken, validateToken} = require('../services/authorizationService');
 
 exports.listUsers = (req, res) => {
     userModel.find()
@@ -143,26 +143,35 @@ exports.loginUser = async (req, res) => {
 }
 
 exports.refreshToken = async (req, res) => {
-    const user = await userModel.findById(req.userInfo.id);
-    if (user.refreshToken != req.body.refreshToken) {
-        return res.status(403).send('Refresh token invalid, expired, or revoked');
+    const refreshToken = req.cookies.jwt;
+    if (!refreshToken) {
+        return res.status(401).json({ message: 'No refresh token provided' });
     }
-    // Generate Tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = await generateRefreshToken(user);
-    // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
-    res.cookie('jwt', refreshToken, {
-        httpOnly: true,
-        secure: false,  // Set to true in production with HTTPS
-        sameSite: 'Strict',
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
-    // Send Access Token as JSON
-    res.json({ 
-        "accessToken": accessToken, 
-        "expiresIn": 1 * 60 * 60, // 1 hour in seconds
-        "tokenType": "Bearer"
-    });
+    try {
+        const decodedInfo = validateToken(refreshToken);
+        const user = await userModel.findById(decodedInfo.id);
+        if (!user || user.refreshToken !== refreshToken) {
+            return res.status(403).json({ message: 'Invalid refresh token session' });
+        }
+        // Generate Tokens
+        const accessToken = generateAccessToken(user);
+        const refreshToken = await generateRefreshToken(user);
+        // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
+        res.cookie('jwt', refreshToken, {
+            httpOnly: true,
+            secure: false,  // Set to true in production with HTTPS
+            sameSite: 'Strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+        // Send Access Token as JSON
+        res.json({ 
+            "accessToken": accessToken, 
+            "expiresIn": 1 * 60 * 60, // 1 hour in seconds
+            "tokenType": "Bearer"
+        });
+    } catch (err) {
+        return res.status(403).send("Token expired or invalid");
+    }
 }
 
 exports.logoutUser = (req, res) => {
