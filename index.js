@@ -1,37 +1,48 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const swaggerUi = require('swagger-ui-express');
+const cors = require('cors');
+const yaml = require('yamljs');
+const path = require('path');
+const cookieParser = require('cookie-parser');
 const protectedRouter = require('./src/routes/protectedRouter');
 const publicRouter = require('./src/routes/publicRouter');
 const authorizationMiddleware = require('./src/middlewares/authorizationMiddleware');
-const cors = require('cors');
-const YAML = require('yamljs');
-const path = require('path');
-const cookieParser = require('cookie-parser');
 
-// env variable set from docker-compose.yaml to access the database container
+// env variables
 const connectionString =  process.env.MONGO_URI || 'mongodb://localhost:27017/login';
-// env variable set from docker-compose.yaml to access set the service port
+const isDebug = process.env.NODE_ENV == 'debug';
 const port = process.env.PORT || 3000;
-// env variable to check if we are in development mode
-const isDev = process.env.NODE_ENV == 'development';
-const swaggerDocument = YAML.load(path.join(__dirname, './docs/swagger.yaml'));
-const swaggerUi = require('swagger-ui-express');
 
+// Swagger setup
+const swaggerDocument = yaml.load(path.join(__dirname, './docs/swagger.yaml'));
+
+// Mongoose setup
 mongoose.connect(connectionString);
 
+// Server setup
 const app = express();
-// Debugging middleware
-app.use((req, res, next) => {
-    console.log(`[DEBUG] Request received: ${req.method} ${req.originalUrl}`);
-    next();
-});
-app.use(cors({
+const corsOptions = {
     origin: 'http://localhost:5173',
-    credentials: true
-}));
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static('public'));
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+// Debugging middleware
+if (isDebug) {
+    app.use((req, res, next) => {
+        console.log(`[DEBUG] Request received: ${req.method} ${req.originalUrl}`);
+        next();
+    });
+}
+
 // Swagger UI setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
@@ -39,9 +50,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/', publicRouter);
 
 // Authorization middleware
-if (!isDev) {
-    app.use(authorizationMiddleware.authorize);
-}
+app.use(authorizationMiddleware.authorize);
 
 // Protected API routes
 app.use('/', protectedRouter);
