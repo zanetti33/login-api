@@ -120,6 +120,9 @@ const getUser = async (identifier, password) => {
 
 exports.loginUser = async (req, res) => {
     // Fetch User
+    if (!req.body.emailOrName || !req.body.password) {
+        return res.status(400).send('Missing parameters');
+    }
     user = await getUser(req.body.emailOrName, req.body.password);
     if (!user) {
         return res.status(401).send('Invalid credentials');
