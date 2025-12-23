@@ -1,9 +1,7 @@
 const {validateToken} = require('../services/authorizationService');
-const isDev = process.env.NODE_ENV == 'development';
 
 exports.authorize = (req, res, next) => {
     const authHeader = req.headers['authorization']
-    console.log(authHeader);
     // Header format is: "Bearer <token>"
     const token = authHeader && authHeader.split(' ')[1];
 

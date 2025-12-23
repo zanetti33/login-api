@@ -1,7 +1,11 @@
+const e = require('express');
 const { userModel } = require('../models/userModel');
 const { generateAccessToken, generateRefreshToken, validateToken} = require('../services/authorizationService');
 
 exports.listUsers = (req, res) => {
+    if (!req.userInfo.isAdmin) {
+        return res.status(403).send('Admin privileges required.');
+    }
     userModel.find()
         .then(doc => {
             res.json(doc);
@@ -12,9 +16,24 @@ exports.listUsers = (req, res) => {
 }
 
 exports.getUser = (req, res) => {
+    if (!req.userInfo.isAdmin) {
+        return res.status(403).send('Admin privileges required.');
+    }
     userModel.findById(req.params.id)
         .then(doc => {
-            console.log(doc);
+            if (!doc) {
+                return res.status(404).send('User not found.');
+            }
+            res.json(doc);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+}
+
+exports.getMe = (req, res) => {
+    userModel.findById(req.userInfo.id)
+        .then(doc => {
             if (!doc) {
                 return res.status(404).send('User not found.');
             }
@@ -54,7 +73,6 @@ exports.updatePassword = (req, res) => {
                 return res.status(404).send('User not found');
             }
             if (doc.password != oldPassword) {
-                console.log("N "+doc.password+", O "+oldPassword);
                 return res.status(403).send('Old password incorrect.');
             }
             userModel.findByIdAndUpdate(req.userInfo.id, {password: newPassword})
@@ -71,8 +89,6 @@ exports.updatePassword = (req, res) => {
         .catch(err => {
             res.status(500).send(err);
         });
-    
-    console.log("user: "+user+", req.userInfo.id "+req.userInfo.id);   
 }
 
 
@@ -149,14 +165,14 @@ exports.refreshToken = async (req, res) => {
     // Get refreshToken from cookies
     const incomingRefreshToken = req.cookies.jwt;
     if (!incomingRefreshToken) {
-        return res.status(403).send();
+        return res.sendStatus(403);
     }
     try {
         // Validate Token with crypt and database value
         const decodedInfo = validateToken(incomingRefreshToken);
         const user = await userModel.findById(decodedInfo.id);
         if (!user || user.refreshToken !== incomingRefreshToken) {
-            return res.status(403).send();
+            return res.sendStatus(403);
         }
         // Generate Tokens
         const accessToken = generateAccessToken(user);
@@ -176,7 +192,7 @@ exports.refreshToken = async (req, res) => {
         });
     } catch (err) {
         console.log(err);
-        return res.status(403).send();
+        return res.sendStatus(403);
     }
 }
 
@@ -184,11 +200,11 @@ exports.logoutUser = (req, res) => {
     userModel.findByIdAndUpdate(req.userInfo.id, {refreshToken: null})
         .then(doc => {
             if (!doc) {
-                return res.status(404).send('User not found');
+                return res.sendStatus(404);
             }
             res.json(doc);
         })
         .catch(err => {
-            res.status(500).send(err);
+            res.sendStatus(500);
         });
 }

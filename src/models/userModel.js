@@ -8,7 +8,17 @@ const userSchema = new mongoose.Schema({
     imageUrl: String,
     refreshToken: String
 }, {
-    versionKey: false
+    versionKey: false,
+    // When calling toJSON, remove sensitive info
+    toJSON: {
+        virtuals: true,
+        transform: function (doc, ret) {
+            delete ret._id;
+            delete ret.refreshToken;
+            delete ret.password;
+            return ret;
+        }
+    }
 });
 
 const userModel = mongoose.model('User', userSchema)

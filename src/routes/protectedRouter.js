@@ -5,6 +5,9 @@ const controller = require('../controllers/userController');
 router.route('/users')
     .get(controller.listUsers);
 
+router.route('/users/me')
+    .get(controller.getMe);
+
 router.route('/users/:id')
     .get(controller.getUser);
 

@@ -44,6 +44,22 @@ paths:
           description: Invalid credentials
         409:
           description: User already present
+  /users/me:
+    get:
+      summary: Get current user info
+      tags:
+        - User Info
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Current user info retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          description: Unauthorized (Invalid Token).
   /users/me/password:
     put:
       summary: Update user password
