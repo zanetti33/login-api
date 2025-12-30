@@ -15,8 +15,6 @@ services:
     container_name: login-api
     depends_on:
       - mongo
-    ports:
-      - ${PORT}:${PORT}
     networks:
       - login-internal-net
       - town-of-saviom-shared-net
