@@ -2,6 +2,5 @@
 - Https per comunicazioni sicure verso il login o renderlo chiuso dentro docker
     - Le comunicazioni interne tra servizi possono usare network docker in chiaro perché non accessibili
     - Le comunicazioni pubbliche possono essere protette da https aggiungendo un servizio nginx che fa proxy per il vero servizio
-- Controllare che l'utente sia admin in get /users
 
 
