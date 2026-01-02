@@ -32,7 +32,7 @@ services:
     depends_on:
       - login-mongo
     ports:
-      - ${LOGIN_PORT}:3000
+      - ${LOGIN_API_PORT}:3000
     networks:
       - login-internal-net
       - town-of-saviom-shared-net
