@@ -1,6 +1,6 @@
 services:
   # the actual db
-  mongo:
+  login-mongo:
     image: mongo
     container_name: login-mongodb-container
     restart: always
@@ -10,14 +10,14 @@ services:
       - login-internal-net
 
   # the management interface to the db 
-  mongo-express:
+  login-mongo-express:
     depends_on:
-      - mongo
+      - login-mongo
     image: mongo-express
     restart: always
     ports:
       # for debug purposes only
-      - 8082:8081
+      - ${LOGIN_DB_UI_PORT:-8081}:8081
     networks:
       - login-internal-net
     environment:
@@ -26,13 +26,13 @@ services:
       ME_CONFIG_BASICAUTH: false
 
   # the api built on top of the db
-  frontend:
+  login-frontend:
     build: .
     container_name: login-api
     depends_on:
-      - mongo
+      - login-mongo
     ports:
-      - ${PORT}:${PORT}
+      - ${PORT}:3000
     networks:
       - login-internal-net
       - town-of-saviom-shared-net
@@ -40,9 +40,10 @@ services:
       # mongodb-container -> nome container del db
       # login -> nome del db
       - MONGO_URI=mongodb://login-mongodb-container:27017/login
-      # production or development
-      - NODE_ENV=production
-      - PORT=${PORT}
+      # production or debug
+      - NODE_ENV=debug
+      # origin url accepted by cors
+      - CORS_ORIGIN=http://localhost:5173
 
 networks:
   login-internal-net:

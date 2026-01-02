@@ -17,4 +17,9 @@ router.route('/auth/public-key')
         res.send({ publicKey: publicKey });
     });
 
+router.route("/")
+    .get((_, res) => {
+        res.redirect(301, '/api-docs');
+    });
+
 module.exports = router;
