@@ -1,13 +1,63 @@
 {
+    "_id": { "$oid": "000000000000000000000123" },
     "name": "admin",
     "password": "adminpass",
     "email": "admin@example.com",
     "isAdmin": true
 }
 {
+    "_id": { "$oid": "000000000000000000000132" },
     "name": "zanetti33",
     "password": "culo1234",
     "email": "lorenzo.zanetti33@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
+}
+{
+    "_id": { "$oid": "000000000000000000000001" },
+    "name": "test1",
+    "password": "1234",
+    "email": "test1@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
+}
+{
+    "_id": { "$oid": "000000000000000000000002" },
+    "name": "test2",
+    "password": "1234",
+    "email": "test2@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
+}
+{
+    "_id": { "$oid": "000000000000000000000003" },
+    "name": "test3",
+    "password": "1234",
+    "email": "test3@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
+}
+{
+    "_id": { "$oid": "000000000000000000000004" },
+    "name": "test4",
+    "password": "1234",
+    "email": "test4@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
+}
+{
+    "_id": { "$oid": "000000000000000000000005" },
+    "name": "test5",
+    "password": "1234",
+    "email": "test5@gmail.com",
+    "isAdmin": false,
+    "imageUrl": "werewolf.png"
+}
+{
+    "_id": { "$oid": "000000000000000000000006" },
+    "name": "test6",
+    "password": "1234",
+    "email": "test6@gmail.com",
     "isAdmin": false,
     "imageUrl": "werewolf.png"
 }

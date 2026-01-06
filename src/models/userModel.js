@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     toJSON: {
         virtuals: true,
         transform: function (doc, ret) {
+            ret.id = ret._id.toString();
             delete ret._id;
             delete ret.refreshToken;
             delete ret.password;

@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { userModel } = require('../models/userModel');
 const privateKey = fs.readFileSync('./private.pem', 'utf8');
 const publicKey = fs.readFileSync('./public.pem', 'utf8');
+const isDebug = process.env.NODE_ENV == 'debug';
 const algorithm = 'RS256';
 const accessDuration = '1h';
 const refreshDuration = '30d';
@@ -34,6 +35,9 @@ generateToken = (user, duration) => {
         imageUrl: user.imageUrl,
         iss: issuer
     };
+    if (isDebug) {
+        console.log(payload);
+    }
     // SIGNING
     // We use RS256 (Asymmetric)
     const token = jwt.sign(payload, privateKey, { 

@@ -1,6 +1,13 @@
 const e = require('express');
 const { userModel } = require('../models/userModel');
 const { generateAccessToken, generateRefreshToken, validateToken} = require('../services/authorizationService');
+const isDebug = process.env.NODE_ENV == 'debug';
+
+log = (message) => {
+    if (isDebug) {
+        console.log(message);
+    }
+}
 
 exports.listUsers = (req, res) => {
     if (!req.userInfo.isAdmin) {
@@ -46,7 +53,7 @@ exports.getMe = (req, res) => {
 
 exports.createUser = (req, res) => {
     const user = new userModel(req.body);
-    //console.log(user);
+    log(user);
     if (!user.email || !user.password || !user.name) {
         return res.status(400).send('Missing parameters');
     }
@@ -143,6 +150,7 @@ exports.loginUser = async (req, res) => {
     if (!user) {
         return res.status(401).send('Invalid credentials');
     }
+    log("Successfully logged: " + user);
     // Generate Tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
@@ -191,7 +199,7 @@ exports.refreshToken = async (req, res) => {
             "tokenType": "Bearer"
         });
     } catch (err) {
-        console.log(err);
+        log(err);
         return res.sendStatus(403);
     }
 }
