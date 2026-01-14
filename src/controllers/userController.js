@@ -1,6 +1,6 @@
 const e = require('express');
 const { userModel } = require('../models/userModel');
-const { generateAccessToken, generateRefreshToken, validateToken} = require('../services/authorizationService');
+const { generateAccessToken, generateRefreshToken, validateToken, validatePassword, hashPassword} = require('../services/authorizationService');
 const isDebug = process.env.NODE_ENV == 'debug';
 
 log = (message) => {
@@ -51,12 +51,13 @@ exports.getMe = (req, res) => {
         });
 }
 
-exports.createUser = (req, res) => {
+exports.createUser = async (req, res) => {
     const user = new userModel(req.body);
-    log(user);
+    user.password = await hashPassword(user.password);
     if (!user.email || !user.password || !user.name) {
         return res.status(400).send('Missing parameters');
     }
+    log(user);
     user.save()
         .then(doc => {
             res.json(doc);
@@ -71,31 +72,24 @@ exports.createUser = (req, res) => {
         });
 }
 
-exports.updatePassword = (req, res) => {
+exports.updatePassword = async (req, res) => {
     const oldPassword = (req.body.oldPassword);
     const newPassword = (req.body.newPassword);
-    const user = userModel.findById(req.userInfo.id)
-        .then(doc => {
-            if (!doc) {
-                return res.status(404).send('User not found');
-            }
-            if (doc.password != oldPassword) {
-                return res.status(403).send('Old password incorrect.');
-            }
-            userModel.findByIdAndUpdate(req.userInfo.id, {password: newPassword})
-            .then(result => {
-                if (!result) {
-                    return res.status(404).send('User not found');
-                }
-                res.json(result);
-                })
-            .catch(err => {
-                res.status(500).send(err);
-            })
-        })
-        .catch(err => {
-            res.status(500).send(err);
-        });
+    if (!oldPassword || !newPassword) {
+        return res.status(400).send('Missing password fields');
+    }
+    const user = await userModel.findById(req.userInfo.id);
+    if (!user) {
+        return res.status(404).send('User not found');
+    }
+    const isMatch = await validatePassword(user, oldPassword);
+    if (!isMatch) {
+        return res.status(403).send('Old password incorrect.');
+    }
+    const hashedNewPassword = await hashPassword(newPassword);
+    user.password = hashedNewPassword;
+    user.save();
+    return res.sendStatus(200);
 }
 
 
@@ -125,19 +119,13 @@ exports.deleteAccount = (req, res) => {
         });
 }
 
-const getUser = async (identifier, password) => {
-    if (!identifier || !password) {
-        throw new Error('Missing credentials');
-    }
-
+const getUser = async (identifier) => {
     const user = await userModel.findOne({
         $or: [
             { name: identifier },
             { email: identifier }
-        ],
-        password: password
+        ]
     });
-
     return user;
 }
 
@@ -146,8 +134,12 @@ exports.loginUser = async (req, res) => {
     if (!req.body.emailOrName || !req.body.password) {
         return res.status(400).send('Missing parameters');
     }
-    user = await getUser(req.body.emailOrName, req.body.password);
-    if (!user) {
+    const user = await getUser(req.body.emailOrName);
+    if (!user || !user.password) {
+        return res.status(401).send('Invalid credentials');
+    }
+    const isMatch = await validatePassword(user, req.body.password);
+    if (!isMatch) {
         return res.status(401).send('Invalid credentials');
     }
     log("Successfully logged: " + user);

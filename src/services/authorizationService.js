@@ -1,5 +1,6 @@
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 const { userModel } = require('../models/userModel');
 const privateKey = fs.readFileSync('./private.pem', 'utf8');
 const publicKey = fs.readFileSync('./public.pem', 'utf8');
@@ -8,6 +9,7 @@ const algorithm = 'RS256';
 const accessDuration = '1h';
 const refreshDuration = '30d';
 const issuer = 'login-api';
+const SECRET = process.env.PASSWORD_SECRET || 'R0s3SArER3d&v10lEtSAR3blU3';
 exports.publicKey = publicKey;
 
 exports.validateToken = (token) => {
@@ -55,4 +57,13 @@ exports.generateRefreshToken = async (user) => {
     const token = generateToken(user, refreshDuration);
     await userModel.findByIdAndUpdate(user._id, { refreshToken: token });
     return token;
+}
+
+exports.validatePassword = async (user, password) => {
+    return await bcrypt.compare(password + SECRET, user.password);
+}
+
+exports.hashPassword = async (password) => {
+    const saltRounds = 10;
+    return await bcrypt.hash(password + SECRET, saltRounds);
 }
