@@ -43,7 +43,7 @@
     "password": "$2b$10$1Amdv5ySdtuZoVkEWhPtiuAXwBlF6NLBHYjYbQwIklNxqSjViK6oO",
     "email": "test4@gmail.com",
     "isAdmin": false,
-    "imageUrl": "princess.svg"
+    "imageUrl": null
 }
 {
     "_id": { "$oid": "000000000000000000000005" },
@@ -51,7 +51,7 @@
     "password": "$2b$10$1Amdv5ySdtuZoVkEWhPtiuAXwBlF6NLBHYjYbQwIklNxqSjViK6oO",
     "email": "test5@gmail.com",
     "isAdmin": false,
-    "imageUrl": "default.svg"
+    "imageUrl": "princess.svg"
 }
 {
     "_id": { "$oid": "000000000000000000000006" },
