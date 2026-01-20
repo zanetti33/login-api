@@ -149,7 +149,7 @@ exports.loginUser = async (req, res) => {
     // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
     res.cookie('jwt', refreshToken, {
         httpOnly: true,
-        secure: false,  // Set to true in production with HTTPS
+        secure: !isDebug, 
         sameSite: 'Strict',
         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
     });
@@ -180,7 +180,7 @@ exports.refreshToken = async (req, res) => {
         // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
         res.cookie('jwt', newRefreshToken, {
             httpOnly: true,
-            secure: false,  // Set to true in production with HTTPS
+            secure: !isDebug,
             sameSite: 'Strict',
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
         });
