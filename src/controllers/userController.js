@@ -2,6 +2,11 @@ const e = require('express');
 const { userModel } = require('../models/userModel');
 const { generateAccessToken, generateRefreshToken, validateToken, validatePassword, hashPassword} = require('../services/authorizationService');
 const isDebug = process.env.NODE_ENV == 'debug';
+// (?=.*[A-Z])  -> Must contain at least one Upper Case letter
+// (?=.*\d)     -> Must contain at least one Digit (0-9)
+// (?=.*[\W_])  -> Must contain at least one Special Character (or underscore)
+// .+$          -> Must contain some characters (matches the string itself)
+const STRONG_PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
 
 log = (message) => {
     if (isDebug) {
@@ -57,6 +62,9 @@ exports.createUser = async (req, res) => {
     if (!user.email || !user.password || !user.name) {
         return res.status(400).send('Missing parameters');
     }
+    if (!passwordSafetyChecks(user.password)) {
+        return res.status(400).send('Invalid password. Must contain at least 1 upper case character, digit and special character.');
+    }
     log(user);
     user.save()
         .then(doc => {
@@ -73,25 +81,48 @@ exports.createUser = async (req, res) => {
 }
 
 exports.updatePassword = async (req, res) => {
-    const oldPassword = (req.body.oldPassword);
-    const newPassword = (req.body.newPassword);
-    if (!oldPassword || !newPassword) {
-        return res.status(400).send('Missing password fields');
-    }
-    const user = await userModel.findById(req.userInfo.id);
-    if (!user) {
-        return res.status(404).send('User not found');
-    }
-    const isMatch = await validatePassword(user, oldPassword);
-    if (!isMatch) {
-        return res.status(403).send('Old password incorrect.');
-    }
-    const hashedNewPassword = await hashPassword(newPassword);
-    user.password = hashedNewPassword;
-    user.save();
-    return res.sendStatus(200);
-}
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.userInfo.id;
 
+    if (!oldPassword || !newPassword) {
+        return res.status(400);
+    }
+
+    if (oldPassword === newPassword) {
+        return res.status(400).send('The new passowrd must be different from the old one.');
+    }
+
+    if (!passwordSafetyChecks(newPassword)) {
+        return res.status(400).send('Invalid password. Must contain at least 1 upper case character, digit and special character.');
+    }
+
+    try {
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).send('User not found');
+        }
+
+        const isMatch = await validatePassword(user, oldPassword);
+        if (!isMatch) {
+            return res.status(403).send('Old password incorrect');
+        }
+
+        const hashedNewPassword = await hashPassword(newPassword);
+
+        user.password = hashedNewPassword;
+        await user.save();
+
+        return res.sendStatus(200);
+    } catch (err) {
+        console.error("Update Password Error:", err);
+        return res.status(500).send('Internal Server Error');
+    }
+};
+
+passwordSafetyChecks = (newPassword) => {
+    return newPassword.length >= 8 &&
+        STRONG_PASSWORD_REGEX.test(newPassword);
+}
 
 exports.updateImage = (req, res) => {
     userModel.findByIdAndUpdate(req.userInfo.id, {imageUrl: req.body.imageUrl})
@@ -142,7 +173,7 @@ exports.loginUser = async (req, res) => {
     if (!isMatch) {
         return res.status(401).send('Invalid credentials');
     }
-    log("Successfully logged: " + user);
+    log("Successfully logged: " + user._id);
     // Generate Tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user);
@@ -176,7 +207,13 @@ exports.refreshToken = async (req, res) => {
         }
         // Generate Tokens
         const accessToken = generateAccessToken(user);
-        const newRefreshToken = await generateRefreshToken(user);
+        let newRefreshToken;
+        try {
+            newRefreshToken = await generateRefreshToken(user, incomingRefreshToken);
+        } catch (raceConditionError) {
+            console.warn("Token race condition detected for user", user._id);
+            return res.sendStatus(403);
+        }
         // Send Refresh Token as HttpOnly Cookie (Security Best Practice)
         res.cookie('jwt', newRefreshToken, {
             httpOnly: true,

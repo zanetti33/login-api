@@ -53,10 +53,24 @@ exports.generateAccessToken = (user) => {
     return generateToken(user, accessDuration);
 }
 
-exports.generateRefreshToken = async (user) => {
-    const token = generateToken(user, refreshDuration);
-    await userModel.findByIdAndUpdate(user._id, { refreshToken: token });
-    return token;
+exports.generateRefreshToken = async (user, oldToken = null) => {
+    const newToken = generateToken(user, refreshDuration);
+    if (oldToken) {
+        const result = await userModel.findOneAndUpdate(
+            { 
+                _id: user._id, 
+                refreshToken: oldToken // <--- The Concurrency Lock
+            },
+            { refreshToken: newToken },
+            { new: true }
+        );
+        if (!result) {
+            throw new Error("Token Reuse Detected");
+        }
+    } else {
+        await userModel.findByIdAndUpdate(user._id, { refreshToken: newToken });
+    }
+    return newToken;
 }
 
 exports.validatePassword = async (user, password) => {
