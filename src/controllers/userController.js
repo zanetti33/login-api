@@ -58,13 +58,15 @@ exports.getMe = (req, res) => {
 
 exports.createUser = async (req, res) => {
     const user = new userModel(req.body);
-    user.password = await hashPassword(user.password);
+
     if (!user.email || !user.password || !user.name) {
         return res.status(400).send('Missing parameters');
     }
     if (!passwordSafetyChecks(user.password)) {
         return res.status(400).send('Invalid password. Must contain at least 1 upper case character, digit and special character.');
     }
+    
+    user.password = await hashPassword(user.password);
     log(user);
     user.save()
         .then(doc => {
