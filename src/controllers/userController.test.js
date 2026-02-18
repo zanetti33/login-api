@@ -27,7 +27,7 @@ describe('User Controller - Create User', () => {
         };
     });
 
-    it('reject a user with a weak password (no uppercase)', async () => {
+    test('reject a user with a weak password (no uppercase)', async () => {
         mockReq.body.password = 'weakpassword1!'; // Missing uppercase
         
         await userController.createUser(mockReq, mockRes);
@@ -36,7 +36,7 @@ describe('User Controller - Create User', () => {
         expect(mockRes.send).toHaveBeenCalledWith(expect.stringContaining('Missing parameters'));
     });
 
-    it('reject a user with a weak password (no digits)', async () => {
+    test('reject a user with a weak password (no digits)', async () => {
         mockReq.body.password = 'WeakPassword!'; // Missing digit
         
         await userController.createUser(mockReq, mockRes);
@@ -45,7 +45,7 @@ describe('User Controller - Create User', () => {
         expect(mockRes.send).toHaveBeenCalledWith(expect.stringContaining('Missing parameters'));
     });
 
-    it('reject a user with a weak password (no special chars)', async () => {
+    test('reject a user with a weak password (no special chars)', async () => {
         mockReq.body.password = 'WeakPassword123'; // Missing special char
         
         await userController.createUser(mockReq, mockRes);
@@ -54,7 +54,7 @@ describe('User Controller - Create User', () => {
         expect(mockRes.send).toHaveBeenCalledWith(expect.stringContaining('Missing parameters'));
     });
 
-    it('pass a user with a strong password', async () => {
+    test('pass a user with a strong password', async () => {
         mockReq.body.password = 'StrongPass_123!';
         
         // Mock userModel.save()

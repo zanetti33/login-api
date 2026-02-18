@@ -22,19 +22,19 @@ describe('Authorization Middleware', () => {
         mockNext = jest.fn();
     });
 
-    it('return 401 if authorization header is missing', () => {
+    test('check if authorization header is missing', () => {
         authorize(mockReq, mockRes, mockNext);
         expect(mockRes.sendStatus).toHaveBeenCalledWith(401);
         expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('return 401 if token is not provided in Bearer format', () => {
+    test('don\'t proceed if token is not provided in Bearer format', () => {
         mockReq.headers['authorization'] = 'Bearer '; // Empty token
         authorize(mockReq, mockRes, mockNext);
         expect(mockRes.sendStatus).toHaveBeenCalledWith(401);
     });
 
-    it('return 403 if the token is invalid', () => {
+    test('don\'t authorize if the token is invalid', () => {
         mockReq.headers['authorization'] = 'Bearer invalid_token';
         authorizationService.validateToken.mockImplementation(() => {
             throw new Error('Invalid token');
@@ -45,7 +45,7 @@ describe('Authorization Middleware', () => {
         expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it('populate req.userInfo and call next() if token is valid', () => {
+    test('populate req.userInfo and call next() if token is valid', () => {
         const mockUserInfo = { id: '123', name: 'TestUser', isAdmin: false };
         mockReq.headers['authorization'] = 'Bearer valid_token';
         authorizationService.validateToken.mockReturnValue(mockUserInfo);

@@ -15,7 +15,7 @@ const { hashPassword, validatePassword } = require('./authorizationService');
 
 describe('Authorization Service - Passwords', () => {
     
-    it('hash a password and successfully validate the correct one', async () => {
+    test('hash a password and successfully validate the correct one', async () => {
         const plainPassword = "MyStrongPassword123!";
         const hashedPassword = await hashPassword(plainPassword);
         const mockUser = { password: hashedPassword };
@@ -24,7 +24,7 @@ describe('Authorization Service - Passwords', () => {
         expect(isMatch).toBe(true);
     });
 
-    it('return false when validating an incorrect password', async () => {
+    test('return false when validating an incorrect password', async () => {
         const plainPassword = "MyStrongPassword123!";
         const wrongPassword = "WrongPassword!";
         
